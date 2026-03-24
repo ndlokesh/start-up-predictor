@@ -25,11 +25,11 @@ function App() {
   const [prediction, setPrediction] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const dashboardRef = useRef(null);
+  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
   useEffect(() => {
     if(!isAuth) return;
-    fetch('http://localhost:8000/metadata')
+    fetch(`${API_BASE}/metadata`)
       .then(res => res.json())
       .then(data => {
         if (data.industries && Object.keys(data.states).length > 0) {
@@ -52,7 +52,7 @@ function App() {
     if(!currentData.district) return; // wait till state-district is populated properly
     try {
       setLoading(true);
-      const res = await fetch('http://localhost:8000/predict', {
+      const res = await fetch(`${API_BASE}/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
