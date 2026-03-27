@@ -78,14 +78,10 @@ function App() {
     }
   }, [isAuth]);
 
-  // Debounced listener
-  useEffect(() => {
-    if(!isAuth) return;
-    const timer = setTimeout(() => {
-      fetchPrediction(formData);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [formData, fetchPrediction, isAuth]);
+  const handleSubmit = (e) => {
+    if(e) e.preventDefault();
+    fetchPrediction(formData);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -148,7 +144,7 @@ function App() {
               {loading && <div className="w-4 h-4 border-2 border-slate-300 border-t-cyan-500 rounded-full animate-spin"></div>}
             </div>
 
-            <form className="space-y-5">
+            <form className="space-y-5" onSubmit={handleSubmit}>
               
               <div className="space-y-1">
                  <label className="text-[11px] font-bold text-slate-500 uppercase">Industry</label>
@@ -172,37 +168,26 @@ function App() {
                 </div>
               </div>
 
-              {/* Sliders */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm font-bold">
-                  <label>Total Funding (INR)</label>
-                  <span className="text-blue-600">₹{Number(formData.total_funding_inr).toLocaleString()}</span>
-                </div>
-                <input type="range" name="total_funding_inr" value={formData.total_funding_inr} onChange={handleChange} min="500000" max="500000000" step="500000" className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+              {/* Manual Inputs */}
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase">Total Funding (INR)</label>
+                <input type="number" name="total_funding_inr" value={formData.total_funding_inr} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-cyan-500" placeholder="e.g. 25000000" />
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm font-bold">
-                  <label>Team Size</label>
-                  <span className="text-blue-600">{formData.team_size} Members</span>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase">Team Size</label>
+                  <input type="number" name="team_size" value={formData.team_size} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-cyan-500" placeholder="e.g. 10" />
                 </div>
-                <input type="range" name="team_size" value={formData.team_size} onChange={handleChange} min="1" max="100" className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+                <div className="space-y-1">
+                  <label className="text-[11px] font-bold text-slate-500 uppercase">Founder Experience (Yrs)</label>
+                  <input type="number" name="founder_experience_years" value={formData.founder_experience_years} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-cyan-500" placeholder="e.g. 5" />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm font-bold">
-                  <label>Founder Experience</label>
-                  <span className="text-blue-600">{formData.founder_experience_years} Years</span>
-                </div>
-                <input type="range" name="founder_experience_years" value={formData.founder_experience_years} onChange={handleChange} min="0" max="30" className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex justify-between items-center text-sm font-bold">
-                  <label>Competitor Density</label>
-                  <span className="text-blue-600">{formData.competitor_density} Entities</span>
-                </div>
-                <input type="range" name="competitor_density" value={formData.competitor_density} onChange={handleChange} min="0" max="30" className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-cyan-500" />
+              <div className="space-y-1">
+                <label className="text-[11px] font-bold text-slate-500 uppercase">Competitor Density (Active Entities)</label>
+                <input type="number" name="competitor_density" value={formData.competitor_density} onChange={handleChange} className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-cyan-500" placeholder="e.g. 12" />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
@@ -218,6 +203,15 @@ function App() {
                   <input type="number" name="funding_rounds" value={formData.funding_rounds} onChange={handleChange} min="1" className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2.5 text-sm font-semibold outline-none focus:ring-2 focus:ring-cyan-500" />
                 </div>
               </div>
+
+              <button 
+                type="submit" 
+                disabled={loading}
+                className="w-full py-4 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-2xl font-bold font-outfit shadow-neon hover:scale-[1.02] transition active:scale-[0.98] disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : <Zap size={20}/>}
+                RUN PROGNOSIS ENGINE
+              </button>
             </form>
           </div>
         </motion.div>
@@ -225,69 +219,45 @@ function App() {
         {/* Right Side: Prediction & Benchmarks */}
         <div className="lg:col-span-7 flex flex-col gap-6">
           <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="bg-white/70 backdrop-blur-md rounded-3xl p-8 border border-white/60 shadow-xl relative flex flex-col items-center">
-            <h2 className="text-xl font-outfit font-bold text-slate-800 mb-2">Real-time Viability Forecast</h2>
-            
-            <div className="relative w-56 h-56 flex items-center justify-center my-4">
-              <svg className="w-full h-full transform -rotate-90" viewBox="0 0 100 100">
-                <circle cx="50" cy="50" r="45" fill="none" stroke="#e2e8f0" strokeWidth="8" />
-                <motion.circle 
-                  cx="50" cy="50" r="45" fill="none" stroke="url(#cyanBlueGrad)" strokeWidth="8" strokeLinecap="round"
-                  initial={{ strokeDasharray: "0, 300" }}
-                  animate={{ strokeDasharray: `${prediction ? (prediction.success_probability * 2.82) : 0}, 300` }}
-                  transition={{ duration: 1, ease: "easeOut" }}
-                />
-                <defs>
-                  <linearGradient id="cyanBlueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#00e5ff" />
-                    <stop offset="100%" stopColor="#2563eb" />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <div className="absolute inset-0 flex flex-col items-center justify-center">
-                <span className="text-6xl font-outfit font-extrabold text-transparent bg-clip-text bg-gradient-to-br from-cyan-600 to-blue-700">
-                  {prediction ? prediction.success_probability.toFixed(0) : '--'}
-                  <span className="text-3xl">%</span>
-                </span>
-                <span className="text-sm font-bold text-slate-500 uppercase tracking-widest mt-1">SUCCESS</span>
-              </div>
-            </div>
-
             <div className="w-full grid md:grid-cols-2 gap-4 mt-2">
-               {prediction?.benchmark && (
-                <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm flex flex-col justify-center">
-                  <h4 className="flex items-center gap-2 text-sm font-bold text-slate-800 mb-4"><Target size={18} className="text-blue-500"/> Unicorn Benchmark Gap</h4>
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex justify-between text-[11px] mb-1.5 font-bold text-slate-500 uppercase tracking-wide">
-                        <span>Funding (₹) vs Series A</span>
-                        <span>{Math.round((formData.total_funding_inr / prediction.benchmark.funding) * 100)}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-blue-500 h-2 rounded-full" style={{ width: `${Math.min((formData.total_funding_inr / prediction.benchmark.funding)*100, 100)}%` }}></div></div>
-                    </div>
-                    <div>
-                      <div className="flex justify-between text-[11px] mb-1.5 font-bold text-slate-500 uppercase tracking-wide">
-                        <span>Team Size vs Peers</span>
-                        <span>{Math.round((formData.team_size / prediction.benchmark.team) * 100)}%</span>
-                      </div>
-                      <div className="w-full bg-slate-100 rounded-full h-2"><div className="bg-cyan-500 h-2 rounded-full" style={{ width: `${Math.min((formData.team_size / prediction.benchmark.team)*100, 100)}%` }}></div></div>
-                    </div>
-                  </div>
+              {prediction && (
+                <div className="bg-emerald-50 rounded-2xl p-5 border border-emerald-200 shadow-sm">
+                  <h4 className="flex items-center gap-2 text-sm font-bold text-emerald-800 mb-3"><Zap size={18} className="text-emerald-500"/> Key Advantages</h4>
+                  <ul className="space-y-2">
+                    {prediction.advantages?.map((adv, i) => (
+                      <li key={i} className="flex gap-2 text-[11px] font-semibold text-slate-700 leading-tight">
+                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 mt-1 shrink-0"></div>
+                        {adv}
+                      </li>
+                    ))}
+                  </ul>
                 </div>
               )}
 
               {prediction && (
-                <div className={`rounded-2xl p-5 flex flex-col justify-center shadow-lg ${prediction.success_probability < 50 ? 'bg-red-50 text-red-900 border-red-200 border-2' : 'bg-emerald-50 text-emerald-900 border-emerald-200 border-2'}`}>
-                  <h4 className={`text-sm font-bold mb-2 flex items-center gap-2 ${prediction.success_probability < 50 ? 'text-red-700' : 'text-emerald-700'}`}>
-                    {prediction.success_probability < 50 ? <AlertTriangle size={18}/> : <ShieldCheck size={18}/>}
-                    {prediction.analysis}
-                  </h4>
-                  <p className="text-xs text-slate-800 mb-3 leading-snug font-medium opacity-90">{prediction.explanation}</p>
-                  <ul className="list-disc pl-4 text-[11px] text-slate-800 space-y-1 font-semibold opacity-90">
-                    {prediction.tips?.slice(0,2).map((tip, i) => <li key={i}>{tip}</li>)}
+                <div className="bg-red-50 rounded-2xl p-5 border border-red-200 shadow-sm">
+                  <h4 className="flex items-center gap-2 text-sm font-bold text-red-800 mb-3"><AlertTriangle size={18} className="text-red-500"/> Potential Risks</h4>
+                  <ul className="space-y-2">
+                    {prediction.disadvantages?.map((dis, i) => (
+                      <li key={i} className="flex gap-2 text-[11px] font-semibold text-slate-700 leading-tight">
+                        <div className="w-1.5 h-1.5 rounded-full bg-red-500 mt-1 shrink-0"></div>
+                        {dis}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}
             </div>
+
+            {prediction && (
+              <div className={`mt-6 w-full rounded-2xl p-5 border shadow-lg ${prediction.success_probability < 50 ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
+                <h4 className="text-sm font-bold mb-2 flex items-center gap-2">
+                  {prediction.success_probability < 50 ? <Activity size={18} className="text-amber-600"/> : <ShieldCheck size={18} className="text-blue-600"/>}
+                  Strategic Summary: {prediction.analysis}
+                </h4>
+                <p className="text-xs text-slate-700 font-medium leading-relaxed">{prediction.explanation}</p>
+              </div>
+            )}
           </motion.div>
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-white/70 backdrop-blur-md rounded-3xl p-6 border border-white/60 shadow-xl flex flex-col md:flex-row items-center gap-6 h-full min-h-[220px]">

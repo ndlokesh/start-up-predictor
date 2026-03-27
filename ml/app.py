@@ -74,27 +74,39 @@ async def predict_success(request: StartupRequest):
         
         if success_prob < 50:
             analysis = "High Risk of Closure."
-            reason = []
-            if request.funding_rounds < 2: reason.append("Insufficient funding rounds to sustain long-term growth.")
-            if request.total_funding_inr < 10000000: reason.append("Low capital accumulation for the chosen sector (Below ₹1 Cr).")
-            if request.team_size < 5: reason.append("Small team size may bottleneck market deployment.")
-            if request.founder_experience_years < 3: reason.append("Limited executive experience increases execution risk.")
-            if request.competitor_density > 15: reason.append("High competitor density indicates severe market saturation.")
-            if not request.has_patent: reason.append("Lack of patents/IP severely reduces defensibility against incumbents.")
-            if not reason: reason.append("Underlying financial markers and industry constraints restrict viability.")
-            explanation = " ".join(reason)
+            advantages = [
+                "Niche market positioning allows for specialized focus",
+                "Low burn rate enables longer survival period",
+                "Direct founder-customer engagement",
+                "Agile decision making with small team",
+                "Targeted marketing potential in specific districts"
+            ]
+            disadvantages = [
+                "Insufficient funding rounds to sustain long-term growth",
+                "Low capital accumulation for the sector (Below ₹1 Cr)",
+                "Small team size may bottleneck market deployment",
+                "Limited executive experience increases execution risk",
+                "High competitor density in the chosen market segment"
+            ]
+            explanation = "Your venture shows high potential but faces significant structural hurdles in funding and team scaling."
             tips = ["Secure additional seed funding to reach ₹2Cr+ runway", "Expand core execution team with domain experts", "File for provisional patents to construct legal IP moats", "Pivot go-to-market strategy to avoid dense competitor segments"]
         else:
             analysis = "High Probability of Success."
-            reason = []
-            if request.funding_rounds >= 3: reason.append("Demonstrated consistent VC trust with multiple funding milestones.")
-            if request.total_funding_inr >= 20000000: reason.append("Robust capital reserves (Above ₹2 Cr) fueling aggressive expansion.")
-            if request.team_size >= 10: reason.append("Adequate team infrastructure to scale operations rapidly.")
-            if request.founder_experience_years >= 5: reason.append("Deep founder experience instills investor confidence.")
-            if request.competitor_density <= 10: reason.append("Operating in an accessible market space with high growth potential.")
-            if request.has_patent: reason.append("Secured IP creates a powerful technological moat against rivals.")
-            if not reason: reason.append("Your venture demonstrates exceptional alignment with standard unicorn frameworks.")
-            explanation = " ".join(reason)
+            advantages = [
+                "Demonstrated consistent VC trust with multiple funding milestones",
+                "Robust capital reserves fueling aggressive expansion",
+                "Adequate team infrastructure to scale operations rapidly",
+                "Deep founder experience instills investor confidence",
+                "Secured IP creates a powerful technological moat against rivals"
+            ]
+            disadvantages = [
+                "High burn rate during scale-up requires constant monitoring",
+                "Increased operational complexity across multiple regions",
+                "Competitive talent acquisition costs in tier-1 cities",
+                "Strict regulatory compliance requirements for mature entities",
+                "Dilution of original culture during rapid team growth"
+            ]
+            explanation = "Your venture demonstrates exceptional alignment with standard unicorn frameworks and strong execution signals."
             tips = ["Accelerate market penetration via strategic corporate partnerships", "Reinvest capital into proprietary R&D to widen IP lead", "Begin preparing audited financials for future IPO planning", "Scale operations into adjacent tier-1 tech hubs"]
 
         benchmarks = {
@@ -120,6 +132,8 @@ async def predict_success(request: StartupRequest):
             "confidence": float(max(prob, 1-prob) * 100),
             "analysis": analysis,
             "explanation": explanation,
+            "advantages": advantages,
+            "disadvantages": disadvantages,
             "tips": tips,
             "benchmark": benchmark,
             "feature_impacts": feature_impacts
